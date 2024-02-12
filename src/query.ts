@@ -46,7 +46,7 @@ db.exec(`CREATE INDEX IF NOT EXISTS
   ON transacoes (customerId)`);
 
 export const findTransacoesPrepared = db.prepare(
-  `SELECT id, valor, tipo, descricao, realizada_em FROM transacoes t WHERE t.customerId = ?1 ORDER BY t.realizada_em DESC LIMIT 10`
+  `SELECT id, valor, tipo, descricao, realizada_em FROM transacoes t WHERE t.customerId = ?1 ORDER BY t.id DESC LIMIT 10`
 );
 
 export const findCustomerPrepared = db.prepare(

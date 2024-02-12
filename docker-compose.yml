@@ -3,7 +3,10 @@ version: "3.7"
 services:
   api01: &api
     hostname: api01
-    image: erickmarx/rinha-2024-q1
+    # image: erickmarx/rinha-2024-q1
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - PORT=8081
     restart: "on-failure"
