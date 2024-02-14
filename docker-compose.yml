@@ -3,7 +3,10 @@ version: "3.7"
 services:
   api01: &api
     hostname: api01
-    image: erickmarx/rinha-2024-q1:latest
+    # image: erickmarx/rinha-2024-q1:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - PORT=8081
     restart: "on-failure"
@@ -12,21 +15,20 @@ services:
     network_mode: "host"
     stdin_open: false
     pull_policy: always
-    volumes:
-      - sqlite_data:/home/bun/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
     deploy:
       resources:
         limits:
-          cpus: "0.60"
-          memory: "250MB"
+          cpus: "0.45"
+          memory: "200MB"
 
   api02:
     <<: *api
     hostname: api02
     environment:
       - PORT=8082
-    depends_on:
-      - api01
 
   nginx:
     image: nginx:latest
@@ -41,8 +43,31 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.30"
-          memory: "50MB"
+          cpus: "0.2"
+          memory: "30MB"
 
-volumes:
-  sqlite_data:
+  postgres:
+    image: onjin/alpine-postgres
+    # image: bitnami/postgresql:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=rinha
+    volumes:
+      - ./postgresql.conf:/docker-entrypoint-initdb.d/1_postgresql.conf
+      - ./init.sql:/docker-entrypoint-initdb.d/2_init.sql
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    network_mode: "host"
+    command: postgres -c checkpoint_timeout=600 -c max_wal_size=4096 -N 50 -c shared_buffers=256MB
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: "110MB"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d rinha -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

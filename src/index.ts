@@ -9,15 +9,15 @@ const requestHandler = async (req: Request) => {
   const set = { status: 200 };
 
   if (req.method === "GET" && getStatementRegex.test(url.pathname)) {
-    const id = +getStatementRegex.exec(url.pathname)![1];
-    const statement = await getStatement(id, set);
+    const customerId = +getStatementRegex.exec(url.pathname)![1];
+    const statement = await getStatement(customerId, set);
     return { status: set.status, body: statement };
   }
 
   if (req.method === "POST" && postDepositRegex.test(url.pathname)) {
-    const id = +postDepositRegex.exec(url.pathname)![1];
+    const customerId = +postDepositRegex.exec(url.pathname)![1];
     const body = await req.json();
-    const deposit = await postDeposit(id, body, set);
+    const deposit = await postDeposit(customerId, body, set);
     return { status: set.status, body: deposit };
   }
 };
